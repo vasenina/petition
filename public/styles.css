@@ -1,0 +1,15 @@
+:root {
+    --bg-color: #ffd8cb;
+    --header-font-color: #c42941;
+    --text-color: #740012;
+    --green: #1e915a;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color: var(--text-color);
+}
+body {
+    background-color: var(--bg-color);
+}

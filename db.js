@@ -1,0 +1,34 @@
+//will be where we have all our functions
+//retriev/add/update
+
+const spicedPg = require("spiced-pg");
+
+const database = "petitiondb";
+const username = "postgres";
+const password = "postgres";
+
+//comunication to the db
+
+const db = spicedPg(
+    `postgress:${username}:${password}:@localhost:5432/${database}`
+);
+
+console.log(`[db] connecting to ${database}`);
+//console.log(db);
+
+// db.query("SELECT * FROM actors")
+//     .then((dbResult) => {
+//         console.log("result from db:", dbResult.rows);
+//     })
+//     .catch((err) => console.log("err in query", err));
+
+module.exports.getSigners = () => {
+    return db.query("SELECT last, first FROM signatures");
+};
+
+module.exports.addSign = (userFirst, userLast, userSign) => {
+    const q = `INSERT INTO actors (first, last, signature) 
+    VALUES ($1, $2, $3);`;
+    const params = [userFirst, userLast, userSign];
+    return db.query(q, params);
+};
