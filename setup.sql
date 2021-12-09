@@ -12,3 +12,5 @@ INSERT INTO signatures (first, last, signature)
 VALUES ('Yuliya', 'Vasenina', 'smth');
 
 SELECT * FROM signatures;
+
+SELECT COUNT(first) FROM signatures;

@@ -1,1 +1,11 @@
 <h1>Great Petition ever</h1>
+<form method="POST">
+    <h1>Sign our Petition</h1>
+    <p>We want to create smth interesting</p>
+    {{#if signedError}}<p>Your input data is wrong</p>{{/if}}
+    <label for="ulast">LastName: </label>
+    <input type="text" id="ulast" name="last" />
+    <label for="ufirst">FirstName: </label>
+    <input type="text" id="ufirst" name="first" />
+    <button type="submit">Submit</button>
+</form>

@@ -27,8 +27,14 @@ module.exports.getSigners = () => {
 };
 
 module.exports.addSign = (userFirst, userLast, userSign) => {
-    const q = `INSERT INTO actors (first, last, signature) 
-    VALUES ($1, $2, $3);`;
+    console.log("i'm adding a  new sign");
+    const q = `INSERT INTO signatures (first, last, signature) 
+VALUES ($1, $2, $3);`;
     const params = [userFirst, userLast, userSign];
     return db.query(q, params);
+};
+
+module.exports.getCountOfSigners = () => {
+    const q = "SELECT COUNT (*) FROM signatures;";
+    return db.query(q);
 };
