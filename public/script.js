@@ -3,7 +3,6 @@ console.log("i'm from script.js");
 (function () {
     var can = document.querySelectorAll("canvas")[0];
     var ctx = can.getContext("2d");
-    console.log(can);
     let mousedown = false;
 
     can.addEventListener("mousedown", (event) => {
@@ -25,5 +24,11 @@ console.log("i'm from script.js");
 
     can.addEventListener("mouseup", (event) => {
         mousedown = false;
+        //const sign = can.toDataURL("image/jpeg", 1);
+        const signImg = can.toDataURL("image/png");
+
+        $("#signInput").val(signImg);
+        // console.log("CANVAS:", can.toDataURL("image/jpeg", 0.3));
+        //console.log("Signature in input:", $("#signInput").val());
     });
 })();

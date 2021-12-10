@@ -28,15 +28,22 @@ module.exports.getSigners = () => {
 
 //check how it works;
 module.exports.addSign = (userFirst, userLast, userSign) => {
-    console.log("i'm adding a  new sign");
-    const q = `INSERT INTO signatures (first, last, signId) 
+    console.log("DB:  i'm adding a  new sign");
+    const q = `INSERT INTO signatures (first, last, signImg) 
                 VALUES ($1, $2, $3)
-                RETURNING signId;`;
+                RETURNING id;`;
     const params = [userFirst, userLast, userSign];
     return db.query(q, params);
 };
 
 module.exports.getCountOfSigners = () => {
     const q = "SELECT COUNT (*) FROM signatures;";
+    return db.query(q);
+};
+
+module.exports.getSignature = (id) => {
+    console.log("DB: i'm getting a signature from ", id);
+    const q = `SELECT signImg FROM signatures WHERE id = ${id};`;
+    const params = [id];
     return db.query(q);
 };

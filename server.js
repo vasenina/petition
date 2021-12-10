@@ -10,15 +10,21 @@ app.set("view engine", "handlebars");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("./public"));
+//prevent clickjacking
+app.use((req, res, next) => {
+    res.setHeader("x-frame-options", "deny");
+    next();
+});
 app.use(
     cookieSession({
         secret: "HelloWorld",
         maxAge: 1000 * 60 * 60 * 24 * 14,
+        sameSite: true,
     })
 );
 
 app.get("/", (req, res) => {
-    console.log("req.session before: ", req.session);
+    //console.log("req.session before: ", req.session);
     req.session.onion = "bigSecret99";
     console.log("req.session before: ", req.session);
 
@@ -28,7 +34,7 @@ app.get("/", (req, res) => {
 app.get("/petition", (req, res) => {
     const signedError = req.query.signed == "error";
     console.log(signedError);
-    console.log(req.query);
+    // console.log(req.query);
     if (req.session.onion === "bigSecret99") {
         res.render("petition", {
             layout: "main",
@@ -36,6 +42,7 @@ app.get("/petition", (req, res) => {
         });
     } else {
         res.send(`<h1>PERMISSION DENIED</h1>`);
+        req.session.onion = "bigSecret99";
     }
 });
 
@@ -54,17 +61,23 @@ app.get("/signers", (req, res) => {
 });
 
 app.get("/thanks", (req, res) => {
-    db.getCountOfSigners()
-        .then((signersCount) => {
-            console.log(signersCount.rows[0].count);
+    const countPromise = db.getCountOfSigners();
+    const signaturePromise = db.getSignature(req.session.id);
+    Promise.all([countPromise, signaturePromise])
+        .then((value) => {
+            // console.log(signersCount.rows[0].count);
+            // console.log(
+            //     "there is a signature from data",
+            //     value[1].rows[0].signimg
+            // );
             res.render("thanks", {
                 layout: "main",
-                signersCount: signersCount.rows[0].count,
-                signature: req.session.signID,
+                signersCount: value[0].rows[0].count,
+                signature: value[1].rows[0].signimg,
             });
         })
         .catch((err) => {
-            console.log("no count of signed", err);
+            console.log("Error in Thanks Promises", err);
             res.render("thanks", {
                 layout: "main",
             });
@@ -73,11 +86,11 @@ app.get("/thanks", (req, res) => {
 
 app.post("/petition", (req, res) => {
     console.log("im in POST petition");
-    console.log(req.body);
-    db.addSign(req.body.first, req.body.last, "smth")
+    //console.log("SIGNATURE:", req.body);
+    db.addSign(req.body.first, req.body.last, req.body.signature)
         .then(({ rows }) => {
-            console.log("ID new user:", rows[0].signid);
-            req.session.signID = rows[0].signid;
+            console.log("ID new user:", rows[0].id);
+            req.session.id = rows[0].id;
             res.redirect("/thanks");
         })
         .catch((err) => {
