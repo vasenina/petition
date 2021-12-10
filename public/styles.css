@@ -13,12 +13,37 @@
 
 body {
     background-color: var(--bg-color);
+    display: grid;
+    grid-template-rows: 50px 1fr 20px;
 }
 
 #signBox {
     border: 1px solid black;
-
     margin: 10px;
 }
+
+main {
+    text-align: center;
+}
 form {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    align-items: center;
+}
+canvas {
+    border-radius: 10px;
+}
+
+button {
+    background-color: var(--text-color);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    width: 150px;
+    height: 60px;
+    font-size: large;
+}
+input {
+    border-radius: 10px;
 }
