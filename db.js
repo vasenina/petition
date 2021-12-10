@@ -26,10 +26,12 @@ module.exports.getSigners = () => {
     return db.query("SELECT last, first FROM signatures");
 };
 
+//check how it works;
 module.exports.addSign = (userFirst, userLast, userSign) => {
     console.log("i'm adding a  new sign");
-    const q = `INSERT INTO signatures (first, last, signature) 
-VALUES ($1, $2, $3);`;
+    const q = `INSERT INTO signatures (first, last, signId) 
+                VALUES ($1, $2, $3)
+                RETURNING signId;`;
     const params = [userFirst, userLast, userSign];
     return db.query(q, params);
 };

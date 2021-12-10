@@ -4,13 +4,19 @@ DROP TABLE IF EXISTS signatures;
        id SERIAL PRIMARY KEY,
        first VARCHAR NOT NULL CHECK (first != ''),
        last VARCHAR NOT NULL CHECK (last != ''),
-       signature VARCHAR NOT NULL CHECK (signature != '')
+       signId VARCHAR NOT NULL CHECK (signId != '')
    );
 
 
-INSERT INTO signatures (first, last, signature) 
+INSERT INTO signatures (first, last, signId) 
 VALUES ('Yuliya', 'Vasenina', 'smth');
+
+
+
 
 SELECT * FROM signatures;
 
 SELECT COUNT(first) FROM signatures;
+
+
+

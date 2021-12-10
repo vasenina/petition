@@ -10,6 +10,15 @@
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     color: var(--text-color);
 }
+
 body {
     background-color: var(--bg-color);
+}
+
+#signBox {
+    border: 1px solid black;
+
+    margin: 10px;
+}
+form {
 }
