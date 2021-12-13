@@ -1,22 +1,38 @@
 DROP TABLE IF EXISTS signatures;
+DROP TABLE IF EXISTS users;
 
-   CREATE TABLE signatures (
-       id SERIAL PRIMARY KEY,
-       first VARCHAR NOT NULL CHECK (first != ''),
-       last VARCHAR NOT NULL CHECK (last != ''),
-       signImg VARCHAR NOT NULL CHECK (signImg != '')
-   );
+CREATE TABLE users(
+      id SERIAL PRIMARY KEY,
+      first VARCHAR(255) NOT NULL,
+      last VARCHAR(255) NOT NULL,
+      email VARCHAR(255) NOT NULL UNIQUE,
+      password VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+  CREATE TABLE signatures(
+      id SERIAL PRIMARY KEY,
+      -- get rid of first and last!
+      signImg TEXT NOT NULL,
+      user_id INTEGER NOT NULL UNIQUE REFERENCES users(id),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
 
 
-INSERT INTO signatures (first, last, signImg) 
-VALUES ('Yuliya', 'Vasenina', 'smth');
+INSERT INTO users (first, last, email, password) 
+VALUES ('Yuliya', 'Vasenina', 'a@a.com', '123');
 
 
+INSERT INTO signatures (signImg, user_id) 
+VALUES ('smth', '1');
 
+SELECT password FROM users WHERE email = 'a@a.com';
+
+SELECT * FROM users;
 
 SELECT * FROM signatures;
 
-SELECT COUNT(first) FROM signatures;
+SELECT COUNT(first) FROM users;
 
 SELECT signImg FROM signatures WHERE id = 1;
 

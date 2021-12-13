@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const db = require("./db");
 const cookieSession = require("cookie-session");
+const { hash, compare } = require("./bc");
 
 const { engine } = require("express-handlebars");
 
@@ -39,7 +40,7 @@ app.get("/clear", (req, res) => {
 
 app.get("/petition", (req, res) => {
     const signedError = req.query.signed == "error";
-    console.log(signedError);
+    //console.log(signedError);
     // console.log(req.query);
     if (req.session.onion === "bigSecret99") {
         if (req.session.id) {
@@ -50,6 +51,8 @@ app.get("/petition", (req, res) => {
         res.render("petition", {
             layout: "main",
             signedError,
+            last: "Funky",
+            first: "Chicken",
         });
     } else {
         res.send(`<h1>PERMISSION DENIED</h1>`);
@@ -116,6 +119,76 @@ app.post("/petition", (req, res) => {
             console.log("sign not added", err);
             res.redirect("/petition?signed=error");
         });
+});
+
+app.get("/register", (req, res) => {
+    console.log("user see a register page");
+    res.render("register", {
+        layout: "main",
+    });
+});
+
+app.post("/register", (req, res) => {
+    //here we recieve user data to register
+    //
+    hash(req.body.password)
+        .then((hashedPw) => {
+            console.log("hashed pw:", hashedPw);
+            console.log(
+                "register-post i want to add this in db",
+                req.body.first,
+                req.body.last,
+                req.body.email,
+                hashedPw
+            );
+            return db.addUser(
+                req.body.first,
+                req.body.last,
+                req.body.email,
+                hashedPw
+            );
+        })
+        .then((userID) => {
+            // console.log("ID of new user for cookies", userID.rows[0].id);
+            req.session.user_id = userID.rows[0].id;
+            res.redirect("/petition");
+        })
+        .catch((err) => {
+            res.redirect("/register?register=error");
+            console.log("error in hashPw", err);
+        });
+});
+app.get("/login", (req, res) => {
+    res.render("login", {});
+});
+app.post("/login", (req, res) => {
+    //here we will want to use compare
+    //retrieve this pw for the email
+
+    //
+    console.log("login post body", req.body);
+    db.getPassword(req.body.email)
+        .then((hashFromDatabase) => {
+            console.log("hashFromDatabase", hashFromDatabase.rows[0].password);
+            return compare(
+                req.body.password,
+                hashFromDatabase.rows[0].password
+            );
+        })
+        .then((match) => {
+            console.log("do provided pw and db stored hash mash", match);
+            if (match) {
+                // ask user id and sign id for this user
+                res.redirect("/petition");
+            } else {
+                res.redirect("/login?login=error");
+            }
+        })
+        .catch((err) => {
+            console.log("error in compare pw", err);
+            res.redirect("/login?login=error");
+        });
+    //res.sendStatus(200);
 });
 
 app.listen(8080, () => {
