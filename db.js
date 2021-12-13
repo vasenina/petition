@@ -34,11 +34,21 @@ module.exports.addUser = (userFirst, userLast, userEmail, userPW) => {
     const params = [userFirst, userLast, userEmail, userPW];
     return db.query(q, params);
 };
+
+module.exports.getUserIdandSignId = (email) => {
+    const q = `SELECT users.id AS user_id , users.email AS email,  signatures.id AS sign_id 
+            FROM users 
+            LEFT JOIN signatures 
+            ON users.id = signatures.user_id 
+            WHERE email = $1;`;
+    const params = [email];
+    return db.query(q, params);
+};
 //check how it works;
 module.exports.addSign = (userSign, userId) => {
     console.log("DB:  i'm adding a  new sign");
     const q = `INSERT INTO signatures (signImg, user_id) 
-                VALUES ($1, $2);
+                VALUES ($1, $2)
                 RETURNING id;`;
     const params = [userSign, userId];
     return db.query(q, params);
@@ -63,7 +73,10 @@ module.exports.getSignature = (id) => {
     return db.query(q, params);
 };
 
-module.exports.selectAllUsers = () => {
-    const q = `SELECT * FROM users;`;
+module.exports.selectAllsignedUsers = () => {
+    const q = `SELECT users.last AS lastname ,users.first AS firstname 
+                FROM users  
+                RIGHT JOIN signatures 
+                ON users.id = signatures.user_id;`;
     return db.query(q);
 };

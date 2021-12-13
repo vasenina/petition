@@ -15,7 +15,7 @@ const db = require("./db");
 //         console.log(err);
 //     });
 
-db.getPassword("b2b.com")
+db.selectAllsignedUsers()
     .then((pass) => console.log(pass))
     .catch((err) => console.log("error", err));
 //db.selectAllUsers().then((result) => console.log("allusers", //result));

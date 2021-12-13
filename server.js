@@ -24,6 +24,9 @@ app.use(
     })
 );
 
+//req.session.user_id;
+//req.session.sign_id;
+
 app.get("/", (req, res) => {
     //console.log("req.session before: ", req.session);
     req.session.onion = "bigSecret99";
@@ -42,9 +45,9 @@ app.get("/petition", (req, res) => {
     const signedError = req.query.signed == "error";
     //console.log(signedError);
     // console.log(req.query);
-    if (req.session.onion === "bigSecret99") {
-        if (req.session.id) {
-            console.log("I know this user:", req.session.id);
+    if (req.session?.user_id) {
+        if (req.session?.sign_id) {
+            console.log("this user signed a petition:", req.session.user_id);
             res.redirect("/thanks");
             return;
         }
@@ -55,14 +58,14 @@ app.get("/petition", (req, res) => {
             first: "Chicken",
         });
     } else {
-        res.send(`<h1>PERMISSION DENIED</h1>`);
-        req.session.onion = "bigSecret99";
+        res.redirect("/login");
+        //req.session.onion = "bigSecret99";
     }
 });
 
 app.get("/signers", (req, res) => {
-    if (req.session?.id) {
-        db.getSigners()
+    if (req.session?.sign_id) {
+        db.selectAllsignedUsers()
             .then(({ rows }) => {
                 //console.log("results.rows", rows);
                 res.render("signers", {
@@ -79,9 +82,9 @@ app.get("/signers", (req, res) => {
 });
 
 app.get("/thanks", (req, res) => {
-    if (req.session?.id) {
+    if (req.session?.sign_id) {
         const countPromise = db.getCountOfSigners();
-        const signaturePromise = db.getSignature(req.session.id);
+        const signaturePromise = db.getSignature(req.session.sign_id);
         Promise.all([countPromise, signaturePromise])
             .then((value) => {
                 // console.log(signersCount.rows[0].count);
@@ -107,12 +110,12 @@ app.get("/thanks", (req, res) => {
 });
 
 app.post("/petition", (req, res) => {
-    console.log("im in POST petition");
+    console.log("im in POST petition with data ");
 
-    db.addSign(req.body.first, req.body.last, req.body.signature)
+    db.addSign(req.body.signature, req.session.user_id)
         .then(({ rows }) => {
-            // console.log("ID new user:", rows[0].id);
-            req.session.id = rows[0].id;
+            console.log("ID new user:", rows[0].id);
+            req.session.sign_id = rows[0].id;
             res.redirect("/thanks");
         })
         .catch((err) => {
@@ -151,6 +154,7 @@ app.post("/register", (req, res) => {
         .then((userID) => {
             // console.log("ID of new user for cookies", userID.rows[0].id);
             req.session.user_id = userID.rows[0].id;
+            req.session.sign_id = null;
             res.redirect("/petition");
         })
         .catch((err) => {
@@ -179,10 +183,22 @@ app.post("/login", (req, res) => {
             console.log("do provided pw and db stored hash mash", match);
             if (match) {
                 // ask user id and sign id for this user
-                res.redirect("/petition");
+                return db.getUserIdandSignId(req.body.email);
             } else {
                 res.redirect("/login?login=error");
             }
+        })
+        .then(({ rows }) => {
+            console.log(
+                "users id and sign id:",
+                rows[0].user_id,
+                rows[0].sign_id
+            );
+            //here we should set cookies
+            req.session.user_id = rows[0].user_id;
+            req.session.sign_id = rows[0].sign_id;
+
+            res.redirect("/petition");
         })
         .catch((err) => {
             console.log("error in compare pw", err);
