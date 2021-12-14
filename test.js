@@ -1,4 +1,6 @@
-//make it impossible to vhenge information about yourself
+//ask how to check requiremments fields - on frontend or backend
+//check how to use helpers
+//make it impossible to change information about yourself
 //add some picture
 
 const db = require("./db");

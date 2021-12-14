@@ -271,12 +271,15 @@ app.post("/profile", (req, res) => {
         res.redirect("/petition");
     } else {
         console.log("POST PROFILE", req.body);
-        db.addProfile(
-            req.body.age,
-            req.body.city,
-            req.body.url,
-            req.session.user_id
-        )
+        const url = "";
+        const age = null;
+        if (db.checkUrl(req.body.url)) {
+            url = req.body.url;
+        }
+        if (req.body.age != "") {
+            age = req.body.age;
+        }
+        db.addProfile(age, req.body.city, url, req.session.user_id)
             .then(() => {
                 res.redirect("/petition");
             })

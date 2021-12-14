@@ -97,3 +97,12 @@ module.exports.selectAllsignedUsersByCity = (city) => {
     const params = [city];
     return db.query(q, params);
 };
+
+module.exports.checkUrl = (url) => {
+    console.log("DB is checking URL ", url);
+    const checkingResult =
+        url.startsWith("https:") ||
+        url.startsWith("http:") ||
+        url.startsWith("//");
+    return checkingResult;
+};
