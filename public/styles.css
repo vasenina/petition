@@ -28,7 +28,7 @@ h1 {
 }
 
 #signBox {
-    border: 1px solid black;
+    border: 1px dotted black;
     margin: 10px;
 }
 
@@ -38,7 +38,7 @@ main {
 form {
     display: flex;
     flex-direction: column;
-    width: 50%;
+
     align-items: center;
 }
 canvas {
@@ -65,5 +65,20 @@ input {
     font-size: 16;
 }
 li {
-    font-family: "Fuzzy Bubbles", cursive;
+    list-style-type: none;
+    background-color: var(--lila);
+    padding: 10px 0;
+}
+ul {
+    margin: 20px;
+}
+header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 3px 7px;
+    align-items: baseline;
+}
+.pink {
+    color: var(--header-font-color);
 }

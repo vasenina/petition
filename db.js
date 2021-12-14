@@ -44,7 +44,7 @@ module.exports.addProfile = (age, city, url, user_id) => {
 };
 
 module.exports.getUserIdandSignId = (email) => {
-    const q = `SELECT users.id AS user_id , users.email AS email,  signatures.id AS sign_id 
+    const q = `SELECT users.id AS user_id , signatures.id AS sign_id , users.last AS last, users.first AS first
             FROM users 
             LEFT JOIN signatures 
             ON users.id = signatures.user_id 
@@ -82,9 +82,18 @@ module.exports.getSignature = (id) => {
 };
 
 module.exports.selectAllsignedUsers = () => {
-    const q = `SELECT users.last AS lastname ,users.first AS firstname 
-                FROM users  
-                RIGHT JOIN signatures 
-                ON users.id = signatures.user_id;`;
+    const q = `SELECT first, last, age, city, url FROM signatures 
+LEFT JOIN users ON signatures.user_id  = users.id 
+LEFT JOIN profiles ON signatures.user_id = profiles.user_id;`;
     return db.query(q);
+};
+
+module.exports.selectAllsignedUsersByCity = (city) => {
+    console.log("DN: I'm looking users from city", city);
+    const q = `SELECT first, last, age, city, url FROM signatures 
+        LEFT JOIN users ON signatures.user_id  = users.id 
+        LEFT JOIN profiles ON signatures.user_id = profiles.user_id
+        WHERE LOWER(profiles.city) = LOWER($1);`;
+    const params = [city];
+    return db.query(q, params);
 };

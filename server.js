@@ -3,6 +3,7 @@ const app = express();
 const db = require("./db");
 const cookieSession = require("cookie-session");
 const { hash, compare } = require("./bc");
+const emj = require("./emoji");
 
 const { engine } = require("express-handlebars");
 
@@ -44,8 +45,7 @@ app.get("/clear", (req, res) => {
 
 app.get("/petition", (req, res) => {
     const signedError = req.query.signed == "error";
-    //console.log(signedError);
-    // console.log(req.query);
+
     if (req.session?.user_id) {
         if (req.session?.sign_id) {
             console.log("this user signed a petition:", req.session.user_id);
@@ -55,12 +55,39 @@ app.get("/petition", (req, res) => {
         res.render("petition", {
             layout: "main",
             signedError,
-            last: "Funky",
-            first: "Chicken",
+            last: req.session.last,
+            first: req.session.first,
         });
     } else {
         res.redirect("/login");
-        //req.session.onion = "bigSecret99";
+    }
+});
+
+app.get("/signers/:city", (req, res) => {
+    const city = req.params.city;
+    console.log("req.params", req.params);
+    console.log("GET signers/city with city", city, req.params.city);
+
+    if (req.session?.sign_id) {
+        db.selectAllsignedUsersByCity(city)
+            .then(({ rows }) => {
+                //console.log("results.rows", rows);
+                for (let i in rows) {
+                    rows[i].emj = emj.getEmoji();
+                }
+                res.render("signers", {
+                    layout: "main",
+                    signers: rows,
+                    last: req.session.last,
+                    first: req.session.first,
+                    byCity: true,
+                });
+            })
+            .catch((err) => {
+                console.log("err in getSigners", err);
+            });
+    } else {
+        res.redirect("/petition");
     }
 });
 
@@ -68,9 +95,16 @@ app.get("/signers", (req, res) => {
     if (req.session?.sign_id) {
         db.selectAllsignedUsers()
             .then(({ rows }) => {
-                //console.log("results.rows", rows);
+                // console.log("results.rows", rows);
+                for (let i in rows) {
+                    rows[i].emj = emj.getEmoji();
+                }
+                rows[0].emj = emj.getEmoji();
+                console.log("results.rows", rows);
                 res.render("signers", {
                     layout: "main",
+                    last: req.session.last,
+                    first: req.session.first,
                     signers: rows,
                 });
             })
@@ -97,12 +131,16 @@ app.get("/thanks", (req, res) => {
                     layout: "main",
                     signersCount: value[0].rows[0].count,
                     signature: value[1].rows[0].signimg,
+                    last: req.session.last,
+                    first: req.session.first,
                 });
             })
             .catch((err) => {
                 console.log("Error in Thanks Promises", err);
                 res.render("thanks", {
                     layout: "main",
+                    last: req.session.last,
+                    first: req.session.first,
                 });
             });
     } else {
@@ -127,9 +165,13 @@ app.post("/petition", (req, res) => {
 
 app.get("/register", (req, res) => {
     console.log("user see a register page");
-    res.render("register", {
-        layout: "main",
-    });
+    if (req.session?.user_id) {
+        res.redirect("/");
+    } else {
+        res.render("register", {
+            layout: "main",
+        });
+    }
 });
 
 app.post("/register", (req, res) => {
@@ -166,13 +208,13 @@ app.post("/register", (req, res) => {
         });
 });
 app.get("/login", (req, res) => {
-    res.render("login", {});
+    if (req.session?.user_id) {
+        res.redirect("/");
+    } else {
+        res.render("login", {});
+    }
 });
 app.post("/login", (req, res) => {
-    //here we will want to use compare
-    //retrieve this pw for the email
-
-    //
     console.log("login post body", req.body);
     db.getPassword(req.body.email)
         .then((hashFromDatabase) => {
@@ -185,7 +227,6 @@ app.post("/login", (req, res) => {
         .then((match) => {
             console.log("do provided pw and db stored hash mash", match);
             if (match) {
-                // ask user id and sign id for this user
                 return db.getUserIdandSignId(req.body.email);
             } else {
                 res.redirect("/login?login=error");
@@ -200,6 +241,8 @@ app.post("/login", (req, res) => {
             //here we should set cookies
             req.session.user_id = rows[0].user_id;
             req.session.sign_id = rows[0].sign_id;
+            req.session.last = rows[0].last;
+            req.session.first = rows[0].first;
 
             res.redirect("/petition");
         })
@@ -214,6 +257,8 @@ app.get("/profile", (req, res) => {
     if (req.session?.user_id) {
         res.render("profile", {
             layout: "main",
+            first: req.session.first,
+            last: req.session.last,
         });
     } else {
         res.redirect("/");

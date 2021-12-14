@@ -28,6 +28,14 @@ CREATE TABLE users(
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+SELECT first, last, age, city, url FROM signatures 
+LEFT JOIN users ON signatures.user_id  = users.id 
+LEFT JOIN profiles ON signatures.user_id = profiles.user_id;
+
+SELECT first, last, age, city, url FROM signatures 
+LEFT JOIN users ON signatures.user_id  = users.id 
+LEFT JOIN profiles ON signatures.user_id = profiles.user_id
+WHERE LOWER(profiles.city) = LOWER('Berlin');
 
 INSERT INTO profiles (age, city, url, user_id) 
 VALUES ('33', '', '', '1');

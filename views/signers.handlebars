@@ -1,6 +1,19 @@
+<h2>The happiest people</h2>
 <ul>
-    <h2>The happiest people</h2>
     {{#each signers}}
-        <li> {{lastname}} {{firstname}}</li>
+        <li>{{emj}}
+            {{#if url}}<a href={{url}}>{{first}} {{last}}</a>
+            {{else}}
+                {{first}}
+                {{last}}
+            {{/if}}
+            {{age}}
+            <a href="/signers/{{city}}">
+                {{city}}</a>
+        </li>
     {{/each}}
+
 </ul>
+{{#if byCity}}
+    <a href="/signers">See all {{signersCount}} happy people</a>
+{{/if}}
