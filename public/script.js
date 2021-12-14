@@ -10,7 +10,7 @@ console.log("i'm from script.js");
         console.log("mousedown");
         ctx.beginPath();
         ctx.lineWidth = 2;
-        ctx.strokeStyle = "blue";
+        ctx.strokeStyle = "#f21d81";
         ctx.moveTo(event.offsetX, event.offsetY);
     });
 

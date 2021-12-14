@@ -27,11 +27,19 @@ module.exports.getSigners = () => {
 };
 
 module.exports.addUser = (userFirst, userLast, userEmail, userPW) => {
-    console.log("DB: I.m addin a new user");
+    console.log("DB: I.m adding a new user");
     const q = `INSERT INTO users (first, last, email, password) 
                 VALUES ($1, $2, $3, $4)
                 RETURNING id;`;
     const params = [userFirst, userLast, userEmail, userPW];
+    return db.query(q, params);
+};
+
+module.exports.addProfile = (age, city, url, user_id) => {
+    console.log("DB: I.m adding a new profile");
+    const q = `INSERT INTO profiles (age, city, url, user_id) 
+                VALUES ($1, $2, $3, $4);`;
+    const params = [age, city, url, user_id];
     return db.query(q, params);
 };
 

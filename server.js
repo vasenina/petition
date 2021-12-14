@@ -26,7 +26,8 @@ app.use(
 
 //req.session.user_id;
 //req.session.sign_id;
-
+//req.session.first
+//req.session.last
 app.get("/", (req, res) => {
     //console.log("req.session before: ", req.session);
     req.session.onion = "bigSecret99";
@@ -144,6 +145,8 @@ app.post("/register", (req, res) => {
                 req.body.email,
                 hashedPw
             );
+            req.session.first = req.body.first;
+            req.session.last = req.body.last;
             return db.addUser(
                 req.body.first,
                 req.body.last,
@@ -155,7 +158,7 @@ app.post("/register", (req, res) => {
             // console.log("ID of new user for cookies", userID.rows[0].id);
             req.session.user_id = userID.rows[0].id;
             req.session.sign_id = null;
-            res.redirect("/petition");
+            res.redirect("/profile");
         })
         .catch((err) => {
             res.redirect("/register?register=error");
@@ -207,6 +210,37 @@ app.post("/login", (req, res) => {
     //res.sendStatus(200);
 });
 
+app.get("/profile", (req, res) => {
+    if (req.session?.user_id) {
+        res.render("profile", {
+            layout: "main",
+        });
+    } else {
+        res.redirect("/");
+    }
+});
+
+app.post("/profile", (req, res) => {
+    if (req.body.age == "" && req.body.city == "" && req.body.url == "") {
+        console.log("POST/profile no data");
+        res.redirect("/petition");
+    } else {
+        console.log("POST PROFILE", req.body);
+        db.addProfile(
+            req.body.age,
+            req.body.city,
+            req.body.url,
+            req.session.user_id
+        )
+            .then(() => {
+                res.redirect("/petition");
+            })
+            .catch((err) => {
+                console.log("Error in adding new profile", err);
+            });
+    }
+});
+
 app.listen(8080, () => {
-    console.log("Petition server is listening..");
+    console.log("Petition server is listening on 8080..");
 });

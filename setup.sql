@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS signatures;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS profiles;
 
 CREATE TABLE users(
       id SERIAL PRIMARY KEY,
@@ -18,9 +19,24 @@ CREATE TABLE users(
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+ CREATE TABLE profiles(
+      id SERIAL PRIMARY KEY,
+      age INTEGER, 
+      city VARCHAR(255), 
+      url VARCHAR(255), 
+      user_id INTEGER NOT NULL UNIQUE REFERENCES users(id),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+
+INSERT INTO profiles (age, city, url, user_id) 
+VALUES ('33', '', '', '1');
+
 
 INSERT INTO users (first, last, email, password) 
 VALUES ('Yuliya', 'Vasenina', 'a@a.com', '123');
+
+
 
 
 INSERT INTO signatures (signImg, user_id) 
