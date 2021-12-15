@@ -384,8 +384,41 @@ app.post("/profile", (req, res) => {
 });
 
 app.post("/delete-signature", (req, res) => {
-    //delete a signature here
-    res.redirect("/");
+    if (req.session?.user_id) {
+        db.deleteSignature(req.session.user_id)
+            .then(() => {
+                req.session.sign_id = null;
+                res.redirect("/");
+            })
+            .catch((err) => {
+                console.log("error in deleting signature", err);
+            });
+    } else {
+        res.redirect("/");
+    }
+});
+
+app.post("/delete-profile", (req, res) => {
+    console.log("Want to delete user with id", req.session.id);
+    if (req.session?.user_id) {
+        const id = req.session?.user_id;
+        let deleteSign = db.deleteSignature(id);
+        let deleteProfile = db.deleteProfile(id);
+        Promise.all([deleteSign, deleteProfile])
+            .then(() => {
+                return db.deleteUser(id);
+            })
+            .then(() => {
+                console.log("user with id ", id, "deleted");
+                req.session = null;
+                res.redirect("/");
+            })
+            .catch((err) => {
+                console.log("Error in deleting user", err);
+            });
+    } else {
+        res.redirect("/");
+    }
 });
 
 app.listen(process.env.PORT || 8080, () => {

@@ -115,6 +115,26 @@ module.exports.getSignature = (id) => {
     return db.query(q, params);
 };
 
+module.exports.deleteSignature = (id) => {
+    console.log("I'm deleting the signature for userId", id);
+    const q = `DELETE FROM signatures WHERE user_id = $1; `;
+    const params = [id];
+    return db.query(q, params);
+};
+
+module.exports.deleteProfile = (id) => {
+    console.log("I'm deleting the profile for userId", id);
+    const q = `DELETE FROM profiles WHERE user_id = $1; `;
+    const params = [id];
+    return db.query(q, params);
+};
+module.exports.deleteUser = (id) => {
+    console.log("I'm deleting the user with id", id);
+    const q = `DELETE FROM users WHERE id = $1; `;
+    const params = [id];
+    return db.query(q, params);
+};
+
 module.exports.getUserProfilebyID = (id) => {
     console.log("DB: getting user profile with id ", id);
     const q = `SELECT first, last, email, age, city FROM users

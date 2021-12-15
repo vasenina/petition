@@ -4,15 +4,19 @@
 <div>
     <img src={{signature}} />
 </div>
-<div>
-    <a href="/signers">See all {{signersCount}} happy people</a>
+<div class="links">
+    <a href="/signers" class="links">See all {{signersCount}} happy people</a>
 </div>
-<div>
+<div class="links">
     <a href="/profile/edit">Edit your profile</a>
 </div>
 
-<form method="POST" action="/delete-signature">
-    <!-- <button type="submit">Delete Signature</button>-->
+<form method="POST" action="/delete-signature" class="links">
+    <a href="#" onclick="this.parentNode.submit();">
+        Delete your signature</a>
+</form>
 
-    <a href="#" onclick="this.parentNode.submit();"> Delete your signature</a>
+<form method="POST" action="/delete-profile" class="links">
+    <a href="#" onclick="this.parentNode.submit();">
+        Delete your profile</a>
 </form>

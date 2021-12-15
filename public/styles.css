@@ -26,6 +26,10 @@ p {
 h1 {
     color: var(--header-font-color);
     font-family: "Amatic SC", cursive;
+    font-size: 50px;
+}
+.logo {
+    font-size: 30px;
 }
 
 #signBox {
@@ -51,14 +55,17 @@ button {
     color: var(--text-color);
     border: 4px solid var(--action-color);
     border-radius: 10px;
-    width: 200px;
+    width: 210px;
     height: 50px;
     font-size: large;
-    margin-top: 15px;
+    margin-top: 25px;
 }
 button:hover {
     cursor: pointer;
     background-color: var(--action-color);
+}
+label {
+    margin-top: 10px;
 }
 input {
     border-radius: 10px;
@@ -82,4 +89,7 @@ header {
 }
 .pink {
     color: var(--header-font-color);
+}
+.links {
+    margin: 20px 0;
 }
