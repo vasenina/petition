@@ -175,11 +175,17 @@ app.post("/petition", (req, res) => {
 
 app.get("/register", (req, res) => {
     console.log("user see a register page");
+
     if (req.session?.user_id) {
         res.redirect("/");
     } else {
+        const err = req.query.error;
+        //if (req.query?.email =="exists")
+        const email = req.query.email;
         res.render("register", {
             layout: "main",
+            err,
+            email,
         });
     }
 });
@@ -213,10 +219,22 @@ app.post("/register", (req, res) => {
             res.redirect("/profile");
         })
         .catch((err) => {
-            res.redirect("/register?register=error");
+            const errQuery = `?error=true` + registerErrorHandling(err);
+            res.redirect(`/register${errQuery}`);
             console.log("error in hashPw", err);
         });
 });
+
+function registerErrorHandling(err) {
+    let detail = err.detail;
+    console.log(typeof detail, detail);
+    if (
+        detail.startsWith("Key (email)") &&
+        detail.endsWith("already exists.")
+    ) {
+        return "&email=exists";
+    } else return "";
+}
 app.get("/login", (req, res) => {
     if (req.session?.user_id) {
         res.redirect("/");
@@ -268,12 +286,15 @@ app.get("/profile/edit", (req, res) => {
         db.getUserProfilebyID(req.session.user_id)
             .then(({ rows }) => {
                 console.log("GET/profile/edit  i'm showing data from database");
+                console.log(req.query);
+                const upd = req.query.upd;
                 res.render("profile", {
                     layout: "main",
                     profile: rows[0],
                     first: req.session.first,
                     last: req.session.last,
                     edit: true,
+                    upd,
                 });
             })
             .catch((err) => console.log("Err in getProfilebyID", err));
@@ -283,6 +304,7 @@ app.get("/profile/edit", (req, res) => {
 });
 app.post("/profile/edit", (req, res) => {
     console.log("POST/profile/edit: I'm editing a profile");
+
     let url = "";
     let age = null;
     if (db.checkUrl(req.body.url)) {
@@ -309,7 +331,7 @@ app.post("/profile/edit", (req, res) => {
             .then(() => {
                 req.session.last = req.body.last;
                 req.session.first = req.body.first;
-                res.redirect("/profile/edit");
+                res.redirect("/profile/edit?upd=true");
             })
             .catch((err) => {
                 console.log("err in updating users or profiles db", err);

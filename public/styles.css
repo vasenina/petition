@@ -74,11 +74,12 @@ input {
 }
 li {
     list-style-type: none;
-    background-color: var(--lila);
+
     padding: 10px 0;
 }
 ul {
     margin: 20px;
+    background-color: var(--lila);
 }
 header {
     display: flex;
@@ -92,4 +93,7 @@ header {
 }
 .links {
     margin: 20px 0;
+}
+.error {
+    color: var(--red);
 }

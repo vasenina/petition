@@ -1,6 +1,6 @@
 {{#if edit}}
     <form method="POST" action = "/profile/edit">
-        <h2>Edit your profile</h2>
+        {{#if upd}}<h2>Your profile updated</h2>{{else}}<h2>Edit your profile</h2>{{/if}}
         <label for="ulast">LastName: </label>
         <input
             type="text"
@@ -35,6 +35,10 @@
         <input type="text" id="uurl" name="url" {{#if profile.url}}value={{profile.url}}{{/if}} />
         <button type="submit">Update</button>
     </form>
+    <form method="POST" action="/delete-profile" class="links">
+    <a href="#" onclick="this.parentNode.submit();">
+        Delete your profile</a>
+</form>
 
 {{else}}
     <form method="POST" id="registerform">
