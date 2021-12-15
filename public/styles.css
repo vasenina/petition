@@ -25,6 +25,7 @@ p {
 
 h1 {
     color: var(--header-font-color);
+    font-family: "Amatic SC", cursive;
 }
 
 #signBox {
@@ -61,7 +62,7 @@ button:hover {
 }
 input {
     border-radius: 10px;
-    padding: 10px 0;
+    padding: 10px 10px;
     font-size: 16;
 }
 li {

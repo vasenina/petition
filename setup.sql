@@ -28,6 +28,16 @@ CREATE TABLE users(
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+
+UPDATE users
+SET first = 'Yulya',last  = 'Vasenina', email = 'a@2.com'
+WHERE id = 1;
+
+INSERT INTO users (first, last, email)
+VALUES ('Yulya', 'Vasenina', 'a@a.com')
+ON CONFLICT (email)
+DO UPDATE SET first = 'Yulya', last = 'Vasenina';
+
 SELECT first, last, age, city, url FROM signatures 
 LEFT JOIN users ON signatures.user_id  = users.id 
 LEFT JOIN profiles ON signatures.user_id = profiles.user_id;
@@ -36,6 +46,10 @@ SELECT first, last, age, city, url FROM signatures
 LEFT JOIN users ON signatures.user_id  = users.id 
 LEFT JOIN profiles ON signatures.user_id = profiles.user_id
 WHERE LOWER(profiles.city) = LOWER('Berlin');
+
+SELECT first, last, email, age, city FROM users
+LEFT JOIN profiles ON users.id = profiles.user_id
+WHERE users.id = 1;
 
 INSERT INTO profiles (age, city, url, user_id) 
 VALUES ('33', '', '', '1');
@@ -60,5 +74,4 @@ SELECT COUNT(first) FROM users;
 
 SELECT signImg FROM signatures WHERE id = 1;
 
-
-
+DELETE FROM signatures WHERE id = $1; 

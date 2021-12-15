@@ -1,11 +1,50 @@
-<form method="POST" id="registerform">
-    <h2>Add more information about you</h2>
+{{#if edit}}
+    <form method="POST" action = "/profile/edit">
+        <h2>Edit your profile</h2>
+        <label for="ulast">LastName: </label>
+        <input
+            type="text"
+            id="ulast"
+            name="last"
+            value={{profile.last}}
+            required
+        />
+        <label for="ufirst">FirstName: </label>
+        <input
+            type="text"
+            id="ufirst"
+            name="first"
+            value={{profile.first}}
+            required
+        />
+        <label for="uemail">Email: </label>
+        <input
+            type="email"
+            id="uemail"
+            name="email"
+            value={{profile.email}}
+            required
+        />
+        <label for="upassword">Password: </label>
+        <input type="password" id="upassword" name="password"/>
+        <label for="uage">Age: </label>
+        <input type="number" id="uage" name="age" {{#if profile.age}}value={{profile.age}} {{/if}} />
+        <label for="ucity">City: </label>
+        <input type="text" id="ucity" name="city"{{#if profile.city}} value={{profile.city}}{{/if}} />
+        <label for="uurl">Url: </label>
+        <input type="text" id="uurl" name="url" {{#if profile.url}}value={{profile.url}}{{/if}} />
+        <button type="submit">Update</button>
+    </form>
 
-    <label for="uage">Age: </label>
-    <input type="number" id="uage" name="age" />
-    <label for="ucity">City: </label>
-    <input type="text" id="ucity" name="city" />
-    <label for="uurl">Url: </label>
-    <input type="text" id="uurl" name="url" />
-    <button type="submit">Continue</button>
-</form>
+{{else}}
+    <form method="POST" id="registerform">
+        <h2>Add more information about you</h2>
+        <label for="uage">Age: </label>
+        <input type="number" id="uage" name="age" />
+        <label for="ucity">City: </label>
+        <input type="text" id="ucity" name="city" />
+        <label for="uurl">Url: </label>
+        <input type="text" id="uurl" name="url" />
+        <button type="submit">Continue</button>
+    </form>
+{{/if}}

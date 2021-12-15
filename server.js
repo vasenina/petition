@@ -100,7 +100,7 @@ app.get("/signers", (req, res) => {
                     rows[i].emj = emj.getEmoji();
                 }
                 rows[0].emj = emj.getEmoji();
-                console.log("results.rows", rows);
+                //console.log("results.rows", rows);
                 res.render("signers", {
                     layout: "main",
                     last: req.session.last,
@@ -253,6 +253,90 @@ app.post("/login", (req, res) => {
     //res.sendStatus(200);
 });
 
+app.get("/profile/edit", (req, res) => {
+    if (req.session?.user_id) {
+        db.getUserProfilebyID(req.session.user_id)
+            .then(({ rows }) => {
+                console.log("GET/profile/edit  i'm showing data from database");
+                res.render("profile", {
+                    layout: "main",
+                    profile: rows[0],
+                    first: req.session.first,
+                    last: req.session.last,
+                    edit: true,
+                });
+            })
+            .catch((err) => console.log("Err in getProfilebyID", err));
+    } else {
+        res.redirect("/");
+    }
+});
+app.post("/profile/edit", (req, res) => {
+    console.log("POST/profile/edit: I'm editing a profile");
+    let url = "";
+    let age = null;
+    if (db.checkUrl(req.body.url)) {
+        url = req.body.url;
+    }
+    if (req.body.age != "") {
+        age = req.body.age;
+    }
+    if (!req.body.password) {
+        //update data in 2 tables with Promise all
+        let updateUsers = db.updateUserbyID(
+            req.session.user_id,
+            req.body.first,
+            req.body.last,
+            req.body.email
+        );
+        let updateProfiles = db.updateProfilesbyUserId(
+            req.session.user_id,
+            age,
+            req.body.city,
+            url
+        );
+        Promise.all([updateUsers, updateProfiles])
+            .then(() => {
+                req.session.last = req.body.last;
+                req.session.first = req.body.first;
+                res.redirect("/profile/edit");
+            })
+            .catch((err) => {
+                console.log("err in updating users or profiles db", err);
+            });
+    } else {
+        hash(req.body.password).then((pass) => {
+            let updateUsers = db.updateUserbyIDwithPassword(
+                req.session.user_id,
+                req.body.first,
+                req.body.last,
+                req.body.email,
+                pass
+            );
+            let updateProfiles = db.updateProfilesbyUserId(
+                req.session.user_id,
+                age,
+                req.body.city,
+                url
+            );
+            Promise.all([updateUsers, updateProfiles])
+                .then(() => {
+                    req.session.last = req.body.last;
+                    req.session.first = req.body.first;
+                    res.redirect("/profile/edit");
+                })
+                .catch((err) => {
+                    console.log("err in updating users or profiles db", err);
+                });
+        });
+
+        //user has changed
+        //we should update db
+        //
+        //req.body.password;
+    }
+});
+
 app.get("/profile", (req, res) => {
     if (req.session?.user_id) {
         res.render("profile", {
@@ -271,8 +355,8 @@ app.post("/profile", (req, res) => {
         res.redirect("/petition");
     } else {
         console.log("POST PROFILE", req.body);
-        const url = "";
-        const age = null;
+        let url = "";
+        let age = null;
         if (db.checkUrl(req.body.url)) {
             url = req.body.url;
         }
@@ -287,6 +371,11 @@ app.post("/profile", (req, res) => {
                 console.log("Error in adding new profile", err);
             });
     }
+});
+
+app.post("/delete-signature", (req, res) => {
+    //delete a signature here
+    res.redirect("/");
 });
 
 app.listen(8080, () => {
