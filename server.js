@@ -19,7 +19,7 @@ app.use((req, res, next) => {
 });
 app.use(
     cookieSession({
-        secret: "HelloWorld",
+        secret: require("./passwords").sessionSecret,
         maxAge: 1000 * 60 * 60 * 24 * 14,
         sameSite: true,
     })
@@ -378,6 +378,6 @@ app.post("/delete-signature", (req, res) => {
     res.redirect("/");
 });
 
-app.listen(8080, () => {
+app.listen(process.env.PORT || 8080, () => {
     console.log("Petition server is listening on 8080..");
 });
