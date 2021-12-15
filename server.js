@@ -19,7 +19,8 @@ app.use((req, res, next) => {
 });
 app.use(
     cookieSession({
-        secret: require("./passwords").sessionSecret,
+        secret:
+            process.env.SESSION_SECRET || require("./passwords").sessionSecret,
         maxAge: 1000 * 60 * 60 * 24 * 14,
         sameSite: true,
     })
