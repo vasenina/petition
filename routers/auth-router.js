@@ -52,11 +52,8 @@ authRouter.post("/register", (req, res) => {
 
 function registerErrorHandling(err) {
     let detail = err.detail;
-    console.log(typeof detail, detail);
-    if (
-        detail.startsWith("Key (email)") &&
-        detail.endsWith("already exists.")
-    ) {
+    let code = err.code;
+    if (code == "23505") {
         return { email: true };
     } else return {};
 }
