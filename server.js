@@ -195,12 +195,11 @@ app.post("/petition", (req, res) => {
             console.log("sign not added", err);
             res.render("petition", {
                 layout: "main",
-                signedError:true;
+                signedError: true,
                 last: req.session.last,
                 first: req.session.first,
             });
             return;
-           
         });
 });
 
