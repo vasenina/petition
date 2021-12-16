@@ -5,6 +5,8 @@ const cookieSession = require("cookie-session");
 const { hash, compare } = require("./bc");
 const emj = require("./emoji");
 
+const { requireSigned, requireNotSigned } = require("./middleware/auth.js");
+
 const { engine } = require("express-handlebars");
 
 //ROUTERS
@@ -52,14 +54,6 @@ app.use((req, res, next) => {
     }
 });
 
-function requireNotSigned(req, res, next) {
-    if (req.session?.sign_id) {
-        res.redirect("/thanks");
-        return;
-    } else {
-        next();
-    }
-}
 //req.session.user_id;
 //req.session.sign_id;
 //req.session.first
@@ -68,8 +62,11 @@ app.get("/", (req, res) => {
     //console.log("req.session before: ", req.session);
     req.session.onion = "bigSecret99";
     // console.log("req.session before: ", req.session);
-
-    res.redirect("/petition");
+    if (req.session?.sign_id) {
+        res.redirect("/thanks");
+    } else {
+        res.redirect("/petition");
+    }
 });
 
 app.get("/clear", (req, res) => {
@@ -78,6 +75,8 @@ app.get("/clear", (req, res) => {
     res.redirect("/");
     return;
 });
+
+//PETITION
 
 app.get("/petition", requireNotSigned, (req, res) => {
     //const signedError = req.query.signed == "error";
@@ -89,92 +88,7 @@ app.get("/petition", requireNotSigned, (req, res) => {
     });
 });
 
-app.get("/signers/:city", (req, res) => {
-    const city = req.params.city;
-    console.log("req.params", req.params);
-    console.log("GET signers/city with city", city, req.params.city);
-
-    if (req.session?.sign_id) {
-        db.selectAllsignedUsersByCity(city)
-            .then(({ rows }) => {
-                //console.log("results.rows", rows);
-                for (let i in rows) {
-                    rows[i].emj = emj.getEmoji();
-                }
-                res.render("signers", {
-                    layout: "main",
-                    signers: rows,
-                    last: req.session.last,
-                    first: req.session.first,
-                    byCity: true,
-                });
-            })
-            .catch((err) => {
-                console.log("err in getSigners", err);
-            });
-    } else {
-        res.redirect("/petition");
-    }
-});
-
-app.get("/signers", (req, res) => {
-    if (req.session?.sign_id) {
-        db.selectAllsignedUsers()
-            .then(({ rows }) => {
-                // console.log("results.rows", rows);
-                for (let i in rows) {
-                    rows[i].emj = emj.getEmoji();
-                }
-                rows[0].emj = emj.getEmoji();
-                //console.log("results.rows", rows);
-                res.render("signers", {
-                    layout: "main",
-                    last: req.session.last,
-                    first: req.session.first,
-                    signers: rows,
-                });
-            })
-            .catch((err) => {
-                console.log("err in getSigners", err);
-            });
-    } else {
-        res.redirect("/petition");
-    }
-});
-
-app.get("/thanks", (req, res) => {
-    if (req.session?.sign_id) {
-        const countPromise = db.getCountOfSigners();
-        const signaturePromise = db.getSignature(req.session.sign_id);
-        Promise.all([countPromise, signaturePromise])
-            .then((value) => {
-                // console.log(signersCount.rows[0].count);
-                // console.log(
-                //     "there is a signature from data",
-                //     value[1].rows[0].signimg
-                // );
-                res.render("thanks", {
-                    layout: "main",
-                    signersCount: value[0].rows[0].count,
-                    signature: value[1].rows[0].signimg,
-                    last: req.session.last,
-                    first: req.session.first,
-                });
-            })
-            .catch((err) => {
-                console.log("Error in Thanks Promises", err);
-                res.render("thanks", {
-                    layout: "main",
-                    last: req.session.last,
-                    first: req.session.first,
-                });
-            });
-    } else {
-        res.redirect("/petition");
-    }
-});
-
-app.post("/petition", (req, res) => {
+app.post("/petition", requireNotSigned, (req, res) => {
     console.log("im in POST petition with data ");
     if (req.body.signature == "") {
         res.render("petition", {
@@ -203,11 +117,99 @@ app.post("/petition", (req, res) => {
         });
 });
 
+//signers
+
+app.get("/signers/:city", (req, res) => {
+    const city = req.params.city;
+    console.log("req.params", req.params);
+    console.log("GET signers/city with city", city, req.params.city);
+
+    if (req.session?.sign_id) {
+        db.selectAllsignedUsersByCity(city)
+            .then(({ rows }) => {
+                //console.log("results.rows", rows);
+                for (let i in rows) {
+                    rows[i].emj = emj.getEmoji();
+                }
+                res.render("signers", {
+                    layout: "main",
+                    signers: rows,
+                    last: req.session.last,
+                    first: req.session.first,
+                    byCity: true,
+                    cityName: city,
+                });
+            })
+            .catch((err) => {
+                console.log("err in getSigners", err);
+            });
+    } else {
+        res.redirect("/");
+    }
+});
+
+app.get("/signers", (req, res) => {
+    if (req.session?.sign_id) {
+        db.selectAllsignedUsers()
+            .then(({ rows }) => {
+                // console.log("results.rows", rows);
+                for (let i in rows) {
+                    rows[i].emj = emj.getEmoji();
+                }
+                rows[0].emj = emj.getEmoji();
+                //console.log("results.rows", rows);
+                res.render("signers", {
+                    layout: "main",
+                    last: req.session.last,
+                    first: req.session.first,
+                    signers: rows,
+                });
+            })
+            .catch((err) => {
+                console.log("err in getSigners", err);
+            });
+    } else {
+        res.redirect("/");
+    }
+});
+
+app.get("/thanks", requireSigned, (req, res) => {
+    if (req.session?.sign_id) {
+        const countPromise = db.getCountOfSigners();
+        const signaturePromise = db.getSignature(req.session.sign_id);
+        Promise.all([countPromise, signaturePromise])
+            .then((value) => {
+                // console.log(signersCount.rows[0].count);
+                // console.log(
+                //     "there is a signature from data",
+                //     value[1].rows[0].signimg
+                // );
+                res.render("thanks", {
+                    layout: "main",
+                    signersCount: value[0].rows[0].count,
+                    signature: value[1].rows[0].signimg,
+                    last: req.session.last,
+                    first: req.session.first,
+                });
+            })
+            .catch((err) => {
+                console.log("Error in Thanks Promises", err);
+                res.render("thanks", {
+                    layout: "main",
+                    last: req.session.last,
+                    first: req.session.first,
+                });
+            });
+    } else {
+        res.redirect("/");
+    }
+});
+
 app.get("/profile/edit", (req, res) => {
     db.getUserProfilebyID(req.session.user_id)
         .then(({ rows }) => {
             console.log("GET/profile/edit  i'm showing data from database");
-            console.log(req.query);
+            console.log(rows[0]);
             const upd = req.query.upd;
             res.render("profile", {
                 layout: "main",
@@ -225,8 +227,19 @@ app.post("/profile/edit", (req, res) => {
 
     let url = "";
     let age = null;
-    if (db.checkUrl(req.body.url)) {
+    if (req.body.url && db.checkUrl(req.body.url)) {
         url = req.body.url;
+        console.log("url is ok");
+    } else {
+        res.render("profile", {
+            layout: "main",
+            profile: req.body,
+            first: req.session.first,
+            last: req.session.last,
+            edit: true,
+            error: true,
+        });
+        return;
     }
     if (req.body.age != "") {
         age = req.body.age;
@@ -249,7 +262,7 @@ app.post("/profile/edit", (req, res) => {
             .then(() => {
                 req.session.last = req.body.last;
                 req.session.first = req.body.first;
-                res.redirect("/profile/edit?upd=true");
+                res.redirect("/profile/edit");
             })
             .catch((err) => {
                 console.log("err in updating users or profiles db", err);
@@ -319,7 +332,7 @@ app.post("/profile", (req, res) => {
     }
 });
 
-app.post("/delete-signature", (req, res) => {
+app.post("/delete-signature", requireSigned, (req, res) => {
     db.deleteSignature(req.session.user_id)
         .then(() => {
             req.session.sign_id = null;
@@ -355,6 +368,10 @@ app.post("/delete-profile", (req, res) => {
         });
 });
 
-app.listen(process.env.PORT || 8080, () => {
-    console.log("Petition server is listening on 8080..");
-});
+if (require.main == module) {
+    app.listen(process.env.PORT || 8080, () => {
+        console.log("Petition server is listening on 8080..");
+    });
+}
+
+module.exports.app = app;

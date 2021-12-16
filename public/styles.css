@@ -104,3 +104,6 @@ header {
 .error {
     color: var(--red);
 }
+.emj {
+    font-size: 25px;
+}

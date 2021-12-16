@@ -131,7 +131,7 @@ module.exports.deleteUser = (id) => {
 
 module.exports.getUserProfilebyID = (id) => {
     console.log("DB: getting user profile with id ", id);
-    const q = `SELECT first, last, email, age, city FROM users
+    const q = `SELECT first, last, email, age, city, url FROM users
                 LEFT JOIN profiles ON users.id = profiles.user_id
                 WHERE users.id = $1;`;
     const params = [id];

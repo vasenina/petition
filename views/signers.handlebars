@@ -1,7 +1,13 @@
-<h2>The happiest people</h2>
+{{#if byCity}}
+    <h2>The happiest people from {{cityName}}</h2>
+
+{{else}}
+    <h2>The happiest people</h2>
+{{/if}}
+
 <ul>
     {{#each signers}}
-        <li>{{emj}}
+        <li><span class="emj">{{emj}}</span>
             {{#if url}}<a href={{url}}>{{first}} {{last}}</a>
             {{else}}
                 {{first}}
