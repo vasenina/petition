@@ -2,6 +2,7 @@
     --bg-color: #fec41b;
     --red: #bf3124;
     --header-font-color: #f21d81;
+    --pink-hover: #ed6da9;
     --text-color: black;
     --action-color: #05f2f2;
     --green: #1e915a;
@@ -30,6 +31,8 @@ h1 {
 }
 .logo {
     font-size: 30px;
+    font-family: "Amatic SC", cursive;
+    color: var(--header-font-color);
 }
 
 #signBox {
@@ -90,6 +93,10 @@ header {
 }
 .pink {
     color: var(--header-font-color);
+}
+
+.pink:hover {
+    color: var(--pink-hover);
 }
 .links {
     margin: 20px 0;

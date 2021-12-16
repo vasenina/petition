@@ -1,9 +1,9 @@
 <h2>Register here and join happy people</h2>
 <p>We are here to be happy!😁</p>
-{{#if err}}
+{{#if error}}
 
     <p class="error">Something is wrong</p>
-    {{#if email}}
+    {{#if error.email}}
         <p class="error">Your email is already exists.
             <a href="/login">Log in here</a></p>{{/if}}
 {{/if}}

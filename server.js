@@ -7,6 +7,9 @@ const emj = require("./emoji");
 
 const { engine } = require("express-handlebars");
 
+//ROUTERS
+const { authRouter } = require("./routers/auth-router.js");
+
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
 
@@ -34,7 +37,29 @@ app.use(
         sameSite: true,
     })
 );
+app.use(authRouter);
 
+app.use((req, res, next) => {
+    if (
+        !req.session?.user_id &&
+        req.url != "/login" &&
+        req.url != "/register" &&
+        req.url != "/clear"
+    ) {
+        res.redirect("/register");
+    } else {
+        next();
+    }
+});
+
+function requireNotSigned(req, res, next) {
+    if (req.session?.sign_id) {
+        res.redirect("/thanks");
+        return;
+    } else {
+        next();
+    }
+}
 //req.session.user_id;
 //req.session.sign_id;
 //req.session.first
@@ -51,26 +76,17 @@ app.get("/clear", (req, res) => {
     req.session = null;
     console.log("Clear cookies", req.session);
     res.redirect("/");
+    return;
 });
 
-app.get("/petition", (req, res) => {
-    const signedError = req.query.signed == "error";
+app.get("/petition", requireNotSigned, (req, res) => {
+    //const signedError = req.query.signed == "error";
 
-    if (req.session?.user_id) {
-        if (req.session?.sign_id) {
-            console.log("this user signed a petition:", req.session.user_id);
-            res.redirect("/thanks");
-            return;
-        }
-        res.render("petition", {
-            layout: "main",
-            signedError,
-            last: req.session.last,
-            first: req.session.first,
-        });
-    } else {
-        res.redirect("/login");
-    }
+    res.render("petition", {
+        layout: "main",
+        last: req.session.last,
+        first: req.session.first,
+    });
 });
 
 app.get("/signers/:city", (req, res) => {
@@ -160,6 +176,14 @@ app.get("/thanks", (req, res) => {
 
 app.post("/petition", (req, res) => {
     console.log("im in POST petition with data ");
+    if (req.body.signature == "") {
+        res.render("petition", {
+            layout: "main",
+            last: req.session.last,
+            first: req.session.first,
+        });
+        return;
+    }
 
     db.addSign(req.body.signature, req.session.user_id)
         .then(({ rows }) => {
@@ -169,138 +193,33 @@ app.post("/petition", (req, res) => {
         })
         .catch((err) => {
             console.log("sign not added", err);
-            res.redirect("/petition?signed=error");
+            res.render("petition", {
+                layout: "main",
+                signedError:true;
+                last: req.session.last,
+                first: req.session.first,
+            });
+            return;
+           
         });
-});
-
-app.get("/register", (req, res) => {
-    console.log("user see a register page");
-
-    if (req.session?.user_id) {
-        res.redirect("/");
-    } else {
-        const err = req.query.error;
-        //if (req.query?.email =="exists")
-        const email = req.query.email;
-        res.render("register", {
-            layout: "main",
-            err,
-            email,
-        });
-    }
-});
-
-app.post("/register", (req, res) => {
-    //here we recieve user data to register
-    //
-    hash(req.body.password)
-        .then((hashedPw) => {
-            console.log("hashed pw:", hashedPw);
-            console.log(
-                "register-post i want to add this in db",
-                req.body.first,
-                req.body.last,
-                req.body.email,
-                hashedPw
-            );
-            req.session.first = req.body.first;
-            req.session.last = req.body.last;
-            return db.addUser(
-                req.body.first,
-                req.body.last,
-                req.body.email,
-                hashedPw
-            );
-        })
-        .then((userID) => {
-            // console.log("ID of new user for cookies", userID.rows[0].id);
-            req.session.user_id = userID.rows[0].id;
-            req.session.sign_id = null;
-            res.redirect("/profile");
-        })
-        .catch((err) => {
-            const errQuery = `?error=true` + registerErrorHandling(err);
-            res.redirect(`/register${errQuery}`);
-            console.log("error in hashPw", err);
-        });
-});
-
-function registerErrorHandling(err) {
-    let detail = err.detail;
-    console.log(typeof detail, detail);
-    if (
-        detail.startsWith("Key (email)") &&
-        detail.endsWith("already exists.")
-    ) {
-        return "&email=exists";
-    } else return "";
-}
-app.get("/login", (req, res) => {
-    if (req.session?.user_id) {
-        res.redirect("/");
-    } else {
-        res.render("login", {});
-    }
-});
-app.post("/login", (req, res) => {
-    console.log("login post body", req.body);
-    db.getPassword(req.body.email)
-        .then((hashFromDatabase) => {
-            console.log("hashFromDatabase", hashFromDatabase.rows[0].password);
-            return compare(
-                req.body.password,
-                hashFromDatabase.rows[0].password
-            );
-        })
-        .then((match) => {
-            console.log("do provided pw and db stored hash mash", match);
-            if (match) {
-                return db.getUserIdandSignId(req.body.email);
-            } else {
-                res.redirect("/login?login=error");
-            }
-        })
-        .then(({ rows }) => {
-            console.log(
-                "users id and sign id:",
-                rows[0].user_id,
-                rows[0].sign_id
-            );
-            //here we should set cookies
-            req.session.user_id = rows[0].user_id;
-            req.session.sign_id = rows[0].sign_id;
-            req.session.last = rows[0].last;
-            req.session.first = rows[0].first;
-
-            res.redirect("/petition");
-        })
-        .catch((err) => {
-            console.log("error in compare pw", err);
-            res.redirect("/login?login=error");
-        });
-    //res.sendStatus(200);
 });
 
 app.get("/profile/edit", (req, res) => {
-    if (req.session?.user_id) {
-        db.getUserProfilebyID(req.session.user_id)
-            .then(({ rows }) => {
-                console.log("GET/profile/edit  i'm showing data from database");
-                console.log(req.query);
-                const upd = req.query.upd;
-                res.render("profile", {
-                    layout: "main",
-                    profile: rows[0],
-                    first: req.session.first,
-                    last: req.session.last,
-                    edit: true,
-                    upd,
-                });
-            })
-            .catch((err) => console.log("Err in getProfilebyID", err));
-    } else {
-        res.redirect("/");
-    }
+    db.getUserProfilebyID(req.session.user_id)
+        .then(({ rows }) => {
+            console.log("GET/profile/edit  i'm showing data from database");
+            console.log(req.query);
+            const upd = req.query.upd;
+            res.render("profile", {
+                layout: "main",
+                profile: rows[0],
+                first: req.session.first,
+                last: req.session.last,
+                edit: true,
+                upd,
+            });
+        })
+        .catch((err) => console.log("Err in getProfilebyID", err));
 });
 app.post("/profile/edit", (req, res) => {
     console.log("POST/profile/edit: I'm editing a profile");
@@ -370,15 +289,11 @@ app.post("/profile/edit", (req, res) => {
 });
 
 app.get("/profile", (req, res) => {
-    if (req.session?.user_id) {
-        res.render("profile", {
-            layout: "main",
-            first: req.session.first,
-            last: req.session.last,
-        });
-    } else {
-        res.redirect("/");
-    }
+    res.render("profile", {
+        layout: "main",
+        first: req.session.first,
+        last: req.session.last,
+    });
 });
 
 app.post("/profile", (req, res) => {
@@ -406,41 +321,39 @@ app.post("/profile", (req, res) => {
 });
 
 app.post("/delete-signature", (req, res) => {
-    if (req.session?.user_id) {
-        db.deleteSignature(req.session.user_id)
-            .then(() => {
-                req.session.sign_id = null;
-                res.redirect("/");
-            })
-            .catch((err) => {
-                console.log("error in deleting signature", err);
-            });
-    } else {
-        res.redirect("/");
-    }
+    db.deleteSignature(req.session.user_id)
+        .then(() => {
+            req.session.sign_id = null;
+            res.redirect("/");
+        })
+        .catch((err) => {
+            console.log("error in deleting signature", err);
+        });
+});
+
+app.post("/logout", (req, res) => {
+    req.session = null;
+    return res.redirect("/");
 });
 
 app.post("/delete-profile", (req, res) => {
     console.log("Want to delete user with id", req.session.id);
-    if (req.session?.user_id) {
-        const id = req.session?.user_id;
-        let deleteSign = db.deleteSignature(id);
-        let deleteProfile = db.deleteProfile(id);
-        Promise.all([deleteSign, deleteProfile])
-            .then(() => {
-                return db.deleteUser(id);
-            })
-            .then(() => {
-                console.log("user with id ", id, "deleted");
-                req.session = null;
-                res.redirect("/");
-            })
-            .catch((err) => {
-                console.log("Error in deleting user", err);
-            });
-    } else {
-        res.redirect("/");
-    }
+
+    const id = req.session?.user_id;
+    let deleteSign = db.deleteSignature(id);
+    let deleteProfile = db.deleteProfile(id);
+    Promise.all([deleteSign, deleteProfile])
+        .then(() => {
+            return db.deleteUser(id);
+        })
+        .then(() => {
+            console.log("user with id ", id, "deleted");
+            req.session = null;
+            res.redirect("/");
+        })
+        .catch((err) => {
+            console.log("Error in deleting user", err);
+        });
 });
 
 app.listen(process.env.PORT || 8080, () => {

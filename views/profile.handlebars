@@ -35,6 +35,10 @@
         <input type="text" id="uurl" name="url" {{#if profile.url}}value={{profile.url}}{{/if}} />
         <button type="submit">Update</button>
     </form>
+    <form method="POST" action="/logout" class="links">
+    <a href="#" onclick="this.parentNode.submit();">
+        Log out</a>
+</form>
     <form method="POST" action="/delete-profile" class="links">
     <a href="#" onclick="this.parentNode.submit();">
         Delete your profile</a>

@@ -17,12 +17,6 @@ const db = spicedPg(
 console.log(`[db] connecting to ${database}`);
 //console.log(db);
 
-// db.query("SELECT * FROM actors")
-//     .then((dbResult) => {
-//         console.log("result from db:", dbResult.rows);
-//     })
-//     .catch((err) => console.log("err in query", err));
-
 module.exports.getSigners = () => {
     return db.query("SELECT last, first FROM signatures");
 };
