@@ -36,9 +36,12 @@ console.log("i'm from script.js");
             x = event.offsetX;
             y = event.offsetY;
         } else if (type == types[1]) {
+            console.log(event);
             const touches = event.changedTouches;
-            x = touches[0].pageX;
-            y = touches[0].pageY - can.offsetTop;
+            const mid = Math.floor(touches.length / 2);
+            console.log(touches.length, mid);
+            x = touches[mid].pageX;
+            y = touches[mid].pageY - can.offsetTop;
         }
         return { x, y };
     }

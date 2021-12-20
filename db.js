@@ -155,7 +155,8 @@ module.exports.selectAllsignedUsersByCity = (city) => {
     return db.query(q, params);
 };
 
-module.exports.checkUrl = (url) => {
+module.exports.checkUrl = (user_url) => {
+    const url = user_url.toLowerCase();
     console.log("DB is checking URL ", url);
     const checkingResult =
         url.startsWith("https:") ||

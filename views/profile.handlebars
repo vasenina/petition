@@ -1,7 +1,7 @@
 {{#if edit}}
     <form method="POST" action = "/profile/edit">
         {{#if upd}}<h2>Your profile updated</h2>{{else}}<h2>Edit your profile</h2>{{/if}}
-        {{#if error}}<p class = "error"> url is not correct!</p>{{/if}}
+        {{#if error}}<p class = "error">❗ url is not correct!</p>{{/if}}
         <label for="ulast">LastName: </label>
         <input
             type="text"
