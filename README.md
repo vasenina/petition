@@ -1,21 +1,21 @@
-# petition
+
+
+### Overview
 
 https://happypeople.herokuapp.com/
 
-## Overview
+### Features
 
-## Features
-
-## Tech stack
+### Tech stack
 Javascript, hadndlebars templates, Html, CSS, express, Node.js, Heroku, PostgreSQL
 
-## Preview
+### Preview
 --add video here
 
-## How to use
+### How to use
 
--clone repo
--npm install
+- clone repo
+- npm install
 - setup database
 - npm start
 
