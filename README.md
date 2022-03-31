@@ -10,7 +10,8 @@ https://happypeople.herokuapp.com/
 Javascript, hadndlebars templates, Html, CSS, express, Node.js, Heroku, PostgreSQL
 
 ### Preview
---add video here
+
+![image](https://github.com/https://github.com/vasenina/petition/description/Happy_people.gif)
 
 ### How to use
 
