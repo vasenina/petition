@@ -11,7 +11,7 @@ Javascript, hadndlebars templates, Html, CSS, express, Node.js, Heroku, PostgreS
 
 ### Preview
 
-![image](https://github.com/https://github.com/vasenina/petition/description/Happy_people.gif)
+![image](https://github.com/vasenina/petition/blob/master/description/Happy_people.gif)
 
 ### How to use
 
